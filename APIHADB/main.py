@@ -6,23 +6,24 @@ import time
 import requests
 import json
 from tcping import Ping
-from cliente_sqlite import seleccionar_servidor
-from cliente_sqlite import cliente_sqlite
+from cliente_sqlite import seleccionar_servidor, seleccionar_tag, actualizar_valor, crear_conexion
+from cliente_sqlite import cliente_sqlite, SQLITE_ARCHIVO
 
-#constantes
-TAGSIM="DESKTOP-3PEVOMB.Ramp"
 
 #Funcion para poder solicitar al API del servidor Historian creado previamente
 #Esta funcion recibira dos parametros:
 def mifuncion(par_url, par_head):
     respuesta = requests.get(par_url, headers=par_head)
     dataHIST = respuesta.json()
+    #secribe el valor que corresponde seguido de la id de la variable
+    hiloRespuestaaSQL = crear_conexion(SQLITE_ARCHIVO)
+    actualiza= actualizar_valor(hiloRespuestaaSQL,(dataHIST["valor"],dataHIST["tiempo"],0))
     print(dataHIST)
 	
 
 if __name__== '__main__':
     #En aqui se configura la url del API del servidor historian
-    id_tag = TAGSIM
+    id_tag = ""
     url="http://"
     historian_IP="0.0.0.0"
     historian_PORT=0
@@ -31,6 +32,8 @@ if __name__== '__main__':
         servidor=seleccionar_servidor(cliente_sqlite)
         historian_IP=servidor[0][2]
         historian_PORT=servidor[0][3]
+        tag=seleccionar_tag(cliente_sqlite)
+        id_tag=tag[0][1]
         url = "http://" + historian_IP + ":" + str(historian_PORT) + "/ver-tags/" + id_tag
     headers = {'user-agent': 'my-app/0.0.1'}
     counter = 0

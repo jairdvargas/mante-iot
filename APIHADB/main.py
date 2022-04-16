@@ -1,16 +1,15 @@
 #Se importa las librerias a utilizar
-from ast import Try
+from ast import And, Try
 import functools
 from threading import Thread
 import time
 import requests
 import json
 from tcping import Ping
+from cliente_sqlite import seleccionar_servidor
+from cliente_sqlite import cliente_sqlite
 
 #constantes
-IP_HISTORIAN="192.168.200.111"
-PUERTO_HISTORIAN="5050"
-HISTORIAN_TAG_URL="http://"+ IP_HISTORIAN+ ":"+PUERTO_HISTORIAN+"/ver-tags/"
 TAGSIM="DESKTOP-3PEVOMB.Ramp"
 
 #Funcion para poder solicitar al API del servidor Historian creado previamente
@@ -24,7 +23,15 @@ def mifuncion(par_url, par_head):
 if __name__== '__main__':
     #En aqui se configura la url del API del servidor historian
     id_tag = TAGSIM
-    url = HISTORIAN_TAG_URL+id_tag
+    url="http://"
+    historian_IP="0.0.0.0"
+    historian_PORT=0
+    #recuperamos la IP del servidor Historian desde la DB
+    with cliente_sqlite:
+        servidor=seleccionar_servidor(cliente_sqlite)
+        historian_IP=servidor[0][2]
+        historian_PORT=servidor[0][3]
+        url = "http://" + historian_IP + ":" + str(historian_PORT) + "/ver-tags/" + id_tag
     headers = {'user-agent': 'my-app/0.0.1'}
     counter = 0
     #Este 1920 es simplemente las veces que va a ejecutar este bucle +1 
@@ -34,13 +41,13 @@ if __name__== '__main__':
         #Asumimos que existe error al principio
         existeError=False
         # Ping(host, port, timeout)
-        ping = Ping(IP_HISTORIAN, PUERTO_HISTORIAN, 5)
+        ping = Ping(historian_IP, historian_PORT, 5)
         try:
             ping.ping(1)
         except:
-            print("Error de conexion a Historian ", IP_HISTORIAN)
+            print("Error de conexion a Historian ", historian_IP)
             existeError=True
-        if existeError == False:
+        if existeError == False and historian_PORT!=0:
             #Iniciamos el hilo para la solicitud del API historian
             req = hilo=Thread(target=functools.partial(mifuncion, url, headers))
             req.start()

@@ -60,6 +60,35 @@ const App = () => {
     }
   };
 
+  //-03----- inicio --- Funcion para actualizar cada x segundos
+  useInterval(() => {
+    // Se lee cada 1000 milisegundos osea 1 segundo los datos del servidor
+    getInstantaneo();
+  }, 1000);
+
+  //https://overreacted.io/making-setinterval-declarative-with-react-hooks/
+  function useInterval(callback, delay) {
+    const savedCallback = useRef();
+  
+    // Remember the latest callback.
+    useEffect(() => {
+      savedCallback.current = callback;
+    }, [callback]);
+  
+    // Set up the interval.
+    useEffect(() => {
+      function tick() {
+        savedCallback.current();
+      }
+      if (delay !== null) {
+        let id = setInterval(tick, delay);
+        return () => clearInterval(id);
+      }
+    }, [delay]);
+  }
+  //--03----- fin
+
+
   return (
     <div className="App">
       <Cabecera titulo="Variables de proceso" />

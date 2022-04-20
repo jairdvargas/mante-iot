@@ -4,6 +4,7 @@ from sqlite3 import Error
 SQLITE_ARCHIVO=r"../Processdata/manteDB.sqlite3"
 SQLITE_TABLA_SERVIDOR="Servidor"
 SQLITE_TABLA_PDB="PDB"
+SQLITE_TABLA_HIST="HistData"
 
 def crear_conexion(db_file):
     conn = None
@@ -31,6 +32,12 @@ def seleccionar_tag(conn):
     tags = cur.fetchall()
     return tags
 
+def seleccionar_hist(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM " + SQLITE_TABLA_HIST)
+    hists = cur.fetchall()
+    return hists
+
 def actualizar_valor(conn, tagyvalor):
     """
     update priority, begin_date, and end date of a task
@@ -41,6 +48,20 @@ def actualizar_valor(conn, tagyvalor):
     sql = ''' UPDATE PDB
               SET valor = ?,
                   fechalectura = ?
+              WHERE id = ?'''
+    
+    cur = conn.cursor()
+    cur.execute(sql,tagyvalor)
+    conn.commit()
+def actualizar_hist(conn, tagyvalor):
+    """
+    update priority, begin_date, and end date of a task
+    :param conn:
+    :param task:
+    :return: project id
+    """
+    sql = ''' UPDATE HistData
+              SET data = ?
               WHERE id = ?'''
     
     cur = conn.cursor()

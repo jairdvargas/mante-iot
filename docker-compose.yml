@@ -1,0 +1,18 @@
+version: '3'
+services:
+  apihmi:
+    restart: always
+    build: ./APIDBAHMI
+    ports:
+      - 5051:5051
+    volumes:
+      - ./APIDBAHMI:/app
+      - ./Processdata:/Processdata
+  frontend:
+    restart: always
+    build: ./frontend
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules/

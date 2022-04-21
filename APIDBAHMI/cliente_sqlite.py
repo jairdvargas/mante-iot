@@ -1,3 +1,4 @@
+from ast import Try
 import sqlite3
 from sqlite3 import Error
 
@@ -42,6 +43,20 @@ def leer_valores_PDB(PDB):
             TagsYProps.append(TagBienFormado)
         return(TagsYProps)
 
+def leer_historicos_PDB(PDB):
+    conn = None
+    try:
+        conn= sqlite3.connect(PDB)
+    except Error as e:
+        print(e)
+    with conn:
+        sql = ''' SELECT data
+              FROM HistData
+              WHERE id = 0'''
+        cur = conn.cursor()
+        cur.execute(sql)
+        tags = cur.fetchall()
+        return tags
 
 if __name__ == '__main__':
     #leerServidor()

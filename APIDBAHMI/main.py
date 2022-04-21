@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from cliente_sqlite import leer_valores_PDB, SQLITE_ARCHIVO
+from cliente_sqlite import leer_valores_PDB,leer_historicos_PDB, SQLITE_ARCHIVO
+import json
 
 app = Flask(__name__)
 # aqui se habilita cors
@@ -31,5 +32,14 @@ def leervaloresPDB():
 #    }
 #]
 
+@app.route("/leerhistoricosPDB", methods=["GET"])
+def leerhistoricosPDB():
+    if request.method == "GET":
+        valoreshistoricos= leer_historicos_PDB(SQLITE_ARCHIVO)
+        #NOTA: Primero llega una <list> con un elemento que adentro tiene un solo <tuple> y su unico elemento es un <str>
+        estuple=valoreshistoricos[0]
+        esStr=estuple[0]
+        return(esStr)
+        
 if __name__ == "__main__":
     app.run("0.0.0.0", port=5051)

@@ -58,6 +58,38 @@ def leer_historicos_PDB(PDB):
         tags = cur.fetchall()
         return tags
 
+def leer_historicos(PDB, id_hist):
+    conn = None
+    try:
+        conn= sqlite3.connect(PDB)
+    except Error as e:
+        print(e)
+    with conn:
+        sql = ''' SELECT data
+              FROM HistData
+              WHERE id = ?'''
+        cur = conn.cursor()
+        cur.execute(sql,str(id_hist))
+        tags = cur.fetchall()
+        return tags
+
+def devolver_tag_historizados(PDB):
+    conn = None
+    try:
+        conn = sqlite3.connect(PDB)
+    except Error as e:
+        print(e)
+    with conn:
+        idtags_hist=[]
+        tagslist=seleccionar_tag(conn)
+        for tag in tagslist:
+            #(0, 'DESKTOP-3PEVOMB.Ramp', 'AI', 'Flujo 1', 0, 10, '600.0', '20-04-2022 15:40:18', 'GOOD', '0', '1000', 'Kg/h', 1)
+            if tag[12] ==1:
+                idtags_hist.append(True)
+            else:
+                idtags_hist.append(False)
+    return(idtags_hist)
+
 if __name__ == '__main__':
     #leerServidor()
     #leerTag()

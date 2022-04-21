@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect} from 'react';
 import { Container, Row, Col, Tab, Tabs} from 'react-bootstrap';
 import axios from 'axios';
 import Actualizar from './componentes/Actualizar';
@@ -54,7 +54,12 @@ const App = () => {
   const getHistorico = async () => {
     try {
       const histresultado = await axios.get(`${API_URL}/leerhistoricosPDB`);
-      definirHistorico(histresultado.data || [])
+      //console.log(histresultado)
+      const temporal = histresultado.data;
+      const dato_de_Str_a_JSON=temporal.map( (elemento, indice) => {
+        return JSON.parse(elemento);
+      })
+      definirHistorico(dato_de_Str_a_JSON || []);
     } catch (error) {
       console.log(error);
     }
@@ -72,35 +77,6 @@ const App = () => {
       console.log(error);
     }
   };
-
-  //-03----- inicio --- Funcion para actualizar cada x segundos
-  useInterval(() => {
-    // Se lee cada 1000 milisegundos osea 1 segundo los datos del servidor
-    getInstantaneo();
-  }, 1000);
-
-  //https://overreacted.io/making-setinterval-declarative-with-react-hooks/
-  function useInterval(callback, delay) {
-    const savedCallback = useRef();
-  
-    // Remember the latest callback.
-    useEffect(() => {
-      savedCallback.current = callback;
-    }, [callback]);
-  
-    // Set up the interval.
-    useEffect(() => {
-      function tick() {
-        savedCallback.current();
-      }
-      if (delay !== null) {
-        let id = setInterval(tick, delay);
-        return () => clearInterval(id);
-      }
-    }, [delay]);
-  }
-  //--03----- fin
-
 
   return (
     <div className="App">
@@ -128,22 +104,29 @@ const App = () => {
         </Tab>
         <Tab eventKey="Historicos" title="Contact">
             <Container className="mt-4">
-              {
-              historico.length ? (
-                <Row sd={1} md={1} lg={1}>
-                    <Col key="0" className="pb-3">
-                      <Grafica
-                        nombreTagHist={historico[0].tag} 
-                        ejeYTagHist={historico.map((datohhh)=> datohhh.valor)}
-                        ejeXTagHist={historico.map((datohhh)=> datohhh.tiempo)} 
-                      />
-                    </Col>
-                  
-                  
-                </Row>
-              ) : (
-                <br />
-              )}
+                {
+                  historico.length ? (
+                    <Row sd={1} md={1} lg={1}>
+                      { historico.map( (elemento, indice) => (
+                        <Col key={indice} className="pb-3">
+                          <Grafica 
+                          nombreTagHist={elemento[0].tag} 
+                          ejeYTagHist={elemento.map((datohhh)=> datohhh.valor)}
+                          ejeXTagHist={elemento.map((datohhh)=> datohhh.tiempo)} 
+                          />
+                        </Col>
+
+                        
+                      )
+
+                      )
+
+                      }
+                    </Row>
+                  ) : (
+                    <br />
+                  )
+                }
             </Container>
         </Tab>
       </Tabs>

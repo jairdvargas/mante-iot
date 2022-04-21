@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from cliente_sqlite import leer_valores_PDB,leer_historicos_PDB, SQLITE_ARCHIVO
+from cliente_sqlite import devolver_tag_historizados, leer_valores_PDB,leer_historicos_PDB, leer_historicos, SQLITE_ARCHIVO
 import json
 
 app = Flask(__name__)
@@ -35,11 +35,23 @@ def leervaloresPDB():
 @app.route("/leerhistoricosPDB", methods=["GET"])
 def leerhistoricosPDB():
     if request.method == "GET":
-        valoreshistoricos= leer_historicos_PDB(SQLITE_ARCHIVO)
-        #NOTA: Primero llega una <list> con un elemento que adentro tiene un solo <tuple> y su unico elemento es un <str>
-        estuple=valoreshistoricos[0]
-        esStr=estuple[0]
-        return(esStr)
+        #Leemos cuales tags estan siendo historizados o no desde la base de datos
+        TagsHistorizados=devolver_tag_historizados(SQLITE_ARCHIVO)
+        #Lista donde se alarmacenara en cada indice un valor true o false segun tenga o no tenga historicos
+        listaHist=[]
+        hist_i=0
+        while hist_i < len(TagsHistorizados):
+            if TagsHistorizados[hist_i]:
+                valoreshistoricos = leer_historicos(SQLITE_ARCHIVO, hist_i)
+                #NOTA: Primero llega una <list> con un elemento que adentro tiene un solo <tuple> y su unico elemento es un <str>
+                estuple=valoreshistoricos[0]
+                esStr=estuple[0]
+                listaHist.append(esStr)
+            hist_i+=1
+        #print("----------")
+        #Se arma un json de cada una de las respuesta de los tags que si estan siendo historizados
+        return jsonify([hist for hist in listaHist])
+
         
 if __name__ == "__main__":
     app.run("0.0.0.0", port=5051)
